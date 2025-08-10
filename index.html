@@ -1,0 +1,2511 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Routly - Hero Section</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				theme: {
+					extend: {
+						fontFamily: { geist: ['Manrope', 'sans-serif'] },
+						animation: {
+							float: 'float 6s ease-in-out infinite',
+							'data-stream': 'dataStream 3s linear infinite',
+							'schema-pulse': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+						},
+						keyframes: {
+							float: {
+								'0%, 100%': { transform: 'translateY(0)' },
+								'50%': { transform: 'translateY(-10px)' },
+							},
+							dataStream: {
+								'0%': { strokeDashoffset: 0 },
+								'100%': { strokeDashoffset: 16 },
+							},
+						},
+					},
+				},
+			};
+		</script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+		<script type="module">
+			import createGlobe from 'https://cdn.skypack.dev/cobe';
+
+			const dpr = Math.min(window.devicePixelRatio || 1, 2);
+			const canvas = document.getElementById('cobe');
+
+			function setCanvasSize() {
+				const rect = canvas.getBoundingClientRect();
+				canvas.width = rect.width * dpr;
+				canvas.height = rect.height * dpr;
+			}
+
+			let cobeGlobe = null;
+			// Current marker color for the Cobe globe (normalized RGB)
+			let cobeMarkerColor = [1, 0.757, 0.027];
+
+			// Expose a setter to allow other scripts to change globe marker color
+			// Accepts either a normalized [r,g,b] array or a hex string like '#RRGGBB'
+			function hexToRgbNormalized(hex) {
+				const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+				if (!m) return cobeMarkerColor;
+				return [
+					parseInt(m[1], 16) / 255,
+					parseInt(m[2], 16) / 255,
+					parseInt(m[3], 16) / 255,
+				];
+			}
+			window.setCobeMarkerColor = (color) => {
+				if (Array.isArray(color) && color.length === 3) {
+					cobeMarkerColor = color;
+				} else if (typeof color === 'string') {
+					cobeMarkerColor = hexToRgbNormalized(color);
+				}
+			};
+			let phi = 0;
+
+			function initGlobe() {
+				setCanvasSize();
+				if (cobeGlobe && cobeGlobe.destroy) cobeGlobe.destroy();
+				cobeGlobe = createGlobe(canvas, {
+					devicePixelRatio: dpr,
+					width: canvas.width,
+					height: canvas.height,
+					phi: 0,
+					theta: 0,
+					dark: 1,
+					diffuse: 1.2,
+					scale: 0.35,
+					mapSamples: 16000,
+					mapBrightness: 6,
+					baseColor: [0.09, 0.635, 0.72],
+					markerColor: [1, 0.757, 0.027],
+					glowColor: [0.0, 0.4, 0.8],
+					offset: [0, 0],
+					markers: [
+						{ location: [37.7595, -122.4367], size: 0.2 },
+						{ location: [40.7128, -74.006], size: 0.2 },
+						{ location: [51.5074, -0.1278], size: 0.2 },
+						{ location: [35.6762, 139.6503], size: 0.2 },
+						{ location: [22.3193, 114.1694], size: 0.2 },
+						{ location: [-33.8688, 151.2093], size: 0.2 },
+					],
+					onRender: (state) => {
+						// Keep rotation
+						state.phi = phi;
+						// Sync marker color with the currently selected text color
+						state.markerColor = cobeMarkerColor;
+						phi += 0.005;
+					},
+				});
+			}
+
+			window.addEventListener('load', initGlobe);
+			window.addEventListener('resize', initGlobe);
+		</script>
+		<style>
+			* {
+			    margin: 0;
+			    padding: 0;
+			    box-sizing: border-box;
+			}
+
+			body {
+			    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			    background: #000000;
+			    overflow-x: hidden;
+			}
+
+			:root {
+			      --electric-blue: #00d4ff;
+			      --cyan-glow: #00ffff;
+			      --light-grey: #eaeaea;
+			      --animation-speed: 1;
+			      --flow-particle-color: var(--electric-blue);
+			  }
+
+			  .flow-container {
+			      font-family: 'Courier New', monospace;
+			      margin: 0;
+			      padding: 0;
+			      box-sizing: border-box;
+			      background: transparent;
+              color: var(--light-grey);
+			      overflow-x: hidden;
+			      min-height: 100vh;
+			      position: relative;
+			      width: 100%;
+			      min-height: 100vh;
+			      display: flex;
+			      flex-direction: column;
+			      align-items: center;
+			      justify-content: center;
+			      padding: 2rem;
+            z-index: 10;
+            scale: 0.95;
+            position: relative;
+            right: 39%;
+            bottom: 10%;
+			  }
+
+              :root {
+                  /* Real viewport height unit set via JS for mobile stability */
+                  --vh: 1vh;
+              }
+
+			  .header {
+			      text-align: center;
+			      margin-bottom: 3rem;
+			      z-index: 10;
+			  }
+
+			  .header h1 {
+			      font-size: 2.5rem;
+			      font-weight: 600;
+			      margin-bottom: 1rem;
+			      color: var(--electric-blue);
+			  }
+
+			  .header p {
+			      font-size: 1.125rem;
+			      max-width: 32rem;
+			      margin: 0 auto;
+			      color: rgba(234, 234, 234, 0.8);
+			  }
+
+              .diagram-container {
+			      position: relative;
+			      width: 100%;
+			      max-width: 75rem;
+                  height: calc(var(--vh, 1vh) * 100);
+			  }
+
+			  .glassmorphism {
+			      background: rgba(255, 255, 255, 0.05);
+			      backdrop-filter: blur(10px);
+			      border: 1px solid rgba(255, 255, 255, 0.2);
+			      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+			  }
+
+			  .svg-pathways {
+			      position: absolute;
+			      inset: 0;
+			      width: 100%;
+			      height: 100%;
+			  }
+
+			  .main-current {
+			      stroke: var(--electric-blue);
+			      stroke-width: 3;
+			      fill: none;
+			      opacity: 0.8;
+			  }
+
+			  .branch-current {
+			      stroke: var(--cyan-glow);
+			      stroke-width: 2;
+			      fill: none;
+			      opacity: 0.6;
+			  }
+
+			  .current-particle {
+			      fill: var(--flow-particle-color);
+			      opacity: 0;
+			      animation: particleFlow calc(3s / var(--animation-speed)) infinite ease-in-out;
+			  }
+
+			  .particle-1 {
+			      animation-delay: calc(0s / var(--animation-speed));
+			  }
+
+			  .particle-2 {
+			      animation-delay: calc(0.6s / var(--animation-speed));
+			  }
+
+			  .particle-3 {
+			      animation-delay: calc(1.2s / var(--animation-speed));
+			  }
+
+			  .particle-4 {
+			      animation-delay: calc(1.8s / var(--animation-speed));
+			  }
+
+			  .particle-5 {
+			      animation-delay: calc(2.4s / var(--animation-speed));
+			  }
+
+			  @keyframes particleFlow {
+			      0% {
+			          opacity: 0;
+			          offset-distance: 0%;
+			      }
+			      10% {
+			          opacity: 1;
+			      }
+			      90% {
+			          opacity: 1;
+			      }
+			      100% {
+			          opacity: 0;
+			          offset-distance: 100%;
+			      }
+			  }
+
+			  .power-source {
+			      position: absolute;
+			      top: 2rem;
+			      left: 50%;
+			      transform: translateX(-50%);
+			      width: 6rem;
+			      height: 2rem;
+			      border-radius: 1rem;
+			      display: flex;
+			      align-items: center;
+			      justify-content: center;
+			      border-color: rgba(0, 212, 255, 0.3);
+			  }
+
+			  .power-indicator {
+			      width: 1rem;
+			      height: 1rem;
+			      border-radius: 50%;
+			      background-color: var(--electric-blue);
+			      animation: pulse 2s infinite;
+			  }
+
+			  .power-label {
+			      margin-left: 0.5rem;
+			      font-size: 0.75rem;
+			      color: var(--electric-blue);
+			  }
+
+			  @keyframes pulse {
+			      0%, 100% { opacity: 1; }
+			      50% { opacity: 0.5; }
+			  }
+
+			  .tech-container {
+			      position: absolute;
+			      width: 6rem;
+			      height: 3rem;
+			      border-radius: 1rem;
+			      padding: 1.5rem;
+			      display: flex;
+			      flex-direction: column;
+			      align-items: center;
+			      justify-content: center;
+			      transition: all 0.3s ease;
+			      cursor: pointer;
+			      border-color: rgba(255, 255, 255, 0.2);
+			      z-index: 1;
+            /* transform: scale(0.75); */
+			  }
+
+			  .tech-container:hover {
+			    
+			      z-index: 10;
+			  }
+
+			  .container-active {
+			      border-color: var(--cyan-glow) !important;
+			  }
+
+			  .container-glow {
+			      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+			  }
+
+			  .tech-logo {
+			      width: 2rem;
+			      height: 2rem;
+			      /* margin-bottom: 0.75rem;   */
+			      color: var(--electric-blue);
+			  }
+
+              /* Ensure embedded SVG logos render as flat, single-color icons and scale correctly */
+              .tech-logo svg { width: 100%; height: 100%; display: block; }
+              .tech-logo svg *,
+              .tech-logo svg path,
+              .tech-logo svg rect,
+              .tech-logo svg g { fill: currentColor !important; stroke: none !important; }
+              /* Hide any embedded background square in some vendor SVGs (e.g., OpenAI st15) */
+              .tech-logo svg .st15 { display: none !important; }
+
+			  .tech-name {
+			      font-size: 0.875rem;
+			      color: rgba(234, 234, 234, 0.8);
+			  }
+
+			  .tech-description {
+			      font-size: 0.75rem;
+			      margin-top: 0.25rem;
+			      color: rgba(0, 212, 255, 0.6);
+			  }
+
+			  .control-panel {
+			      position: absolute;
+			      bottom: 2rem;
+			      left: 50%;
+			      transform: translateX(-50%);
+			      border-radius: 1rem;
+			      padding: 1rem;
+			      border-color: rgba(255, 255, 255, 0.2);
+			      display: flex;
+			      align-items: center;
+			      gap: 1rem;
+			  }
+
+			  .control-button {
+			      padding: 0.5rem 1rem;
+			      border-radius: 0.5rem;
+			      font-size: 0.875rem;
+			      font-family: 'Courier New', monospace;
+			      transition: all 0.3s ease;
+			      border: none;
+			      cursor: pointer;
+			  }
+
+			  .control-button.active {
+			      background-color: rgba(0, 212, 255, 0.3);
+			      color: var(--electric-blue);
+			  }
+
+			  .control-button.inactive {
+			      background-color: rgba(26, 26, 46, 0.5);
+			      color: var(--light-grey);
+			  }
+
+			  .control-button:hover {
+			      opacity: 0.8;
+			  }
+
+			  .speed-control {
+			      display: flex;
+			      align-items: center;
+			      gap: 0.5rem;
+			  }
+
+			  .speed-label {
+			      font-size: 0.75rem;
+			      color: rgba(234, 234, 234, 0.6);
+			  }
+
+			  .speed-slider {
+			      width: 5rem;
+			      -webkit-appearance: none;
+			      appearance: none;
+			      height: 4px;
+			      border-radius: 2px;
+			      background: rgba(255, 255, 255, 0.2);
+			      outline: none;
+			  }
+
+			  .speed-slider::-webkit-slider-thumb {
+			      -webkit-appearance: none;
+			      appearance: none;
+			      width: 16px;
+			      height: 16px;
+			      border-radius: 50%;
+			      background: var(--electric-blue);
+			      cursor: pointer;
+			  }
+
+			  .speed-slider::-moz-range-thumb {
+			      width: 16px;
+			      height: 16px;
+			      border-radius: 50%;
+			      background: var(--electric-blue);
+			      cursor: pointer;
+			      border: none;
+			  }
+
+			  .speed-value {
+			      font-size: 0.75rem;
+			      color: var(--electric-blue);
+			  }
+
+              /* Position classes */
+              .pos-cloud { top: 26rem; left: 4rem; }
+              .pos-database { top: 27rem; left: 9rem; }
+              .pos-api { top: 26rem; left: 50%; transform: translateX(-50%); }
+              .pos-analytics { top: 27rem; right: 9rem; }
+              .pos-security { top: 26rem; right: 4rem; }
+
+			  /* Responsive design */
+              @media (max-width: 768px) {
+                  .diagram-container {
+                      height: calc(var(--vh, 1vh) * 80);
+                  }
+
+			      .header h1 {
+			          font-size: 2rem;
+			      }
+
+			      .tech-container {
+			          width: 8rem;
+			          height: 6rem;
+			          padding: 1rem;
+			      }
+
+                  .tech-logo {
+			          width: 2rem;
+			          height: 2rem;
+			      }
+			  }
+
+			/* Custom animations */
+			@keyframes spin-slow {
+			  from { transform: rotate(0deg); }
+			  to { transform: rotate(360deg); }
+			}
+
+			.animate-spin-slow {
+			  animation: spin-slow 12s linear infinite;
+			}
+
+			#dynamic-background {
+			    position: absolute;
+			    top: 0;
+			    left: 0;
+			    width: 100%;
+			    height: 100%;
+			    z-index: 1;
+			    pointer-events: none;
+			}
+
+			.globe-container {
+			    position: relative;
+			    width: 100%;
+			    min-height: 100vh;
+			    display: grid;
+			    grid-template-columns: 1fr;
+			    place-items: center;
+			    overflow: hidden;
+			    background: #000; /* Fallback background */
+			}
+
+			/* Mobile layout wrapper */
+			@media (max-width: 768px) {
+			    .globe-container {
+			        display: flex;
+			        flex-direction: column;
+			        justify-content: space-between;
+			        padding-top: 80px; /* Account for navbar */
+			        padding-bottom: 20px;
+			    }
+			}
+
+			.hero {
+			    position: relative;
+			    width: 100%;
+			    height: 100%;
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			}
+
+			/* Mobile hero positioning */
+			@media (max-width: 768px) {
+			    .hero {
+			        position: fixed;
+			        top: 50%;
+			        left: 50%;
+			        transform: translate(-50%, -50%);
+			        width: 100vw;
+			        height: 60vh;
+			        z-index: 2;
+			        pointer-events: none;
+			    }
+			}
+
+			/* Cycle word styles */
+			#cycle-word-container {
+			    position: absolute;
+			    width: 100%;
+			    text-align: center;
+			    top: 15%;
+			    right: 37%;
+			    z-index: 10;
+			    opacity: 1;
+			    transition: opacity 0.5s ease-out;
+			    pointer-events: none;
+			}
+
+			@media (max-width: 768px) {
+			    #cycle-word-container {
+			        left: 50%;
+			        right: auto;
+			        top: 12%; /* tweak as needed */
+			        transform: translateX(-50%);
+			        width: 90vw;
+			        text-align: center;
+			    }
+			}
+
+			#cycle-word {
+			    font-size: 1.3rem;
+			    font-weight: 700;
+			    color: white; /* Default to first color */
+			    text-transform: uppercase;
+			    letter-spacing: 2px;
+			    font-style: italic;
+			    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+			}
+
+			.optimize {
+			    font-size: 1.5rem;
+			    font-weight: 400;
+			    color: white;
+			    letter-spacing: 2px;
+			}
+
+			@media (max-width: 768px) {
+			    #cycle-word {
+			        font-size: 1.5rem;
+			    }
+			}
+
+			#cobe {
+			    position: absolute;
+			    top: 15%;
+			    left: 0;
+			    width: 100%;
+			    height: 100%;
+			    z-index: 2;
+			}
+
+			#particle-canvas {
+			    position: absolute;
+			    top: 0;
+			    left: 0;
+			    width: 100%;
+			    height: 100%;
+			    z-index: 3;
+			}
+
+			.hero-content {
+			    position: relative;
+			    top: 18%;
+			    z-index: 3;
+			    text-align: left;
+			    color: white;
+			    max-width: 800px;
+			    padding: 0 20px;
+			}
+
+			/* Split hero content for mobile */
+			.hero-content-primary {
+			    display: block;
+			}
+
+			.hero-content-secondary {
+			    display: none;
+			}
+
+			@media (max-width: 768px) {
+			    .hero-content {
+			        display: none; /* Hide desktop version */
+			    }
+
+			    .hero-content-primary {
+			        position: relative;
+			        z-index: 10;
+			        text-align: center;
+			        color: white;
+			        padding: 20px;
+			        margin-top: 20px;
+			        width: 100%;
+			    }
+
+			    .hero-content-secondary {
+			        display: block;
+			        position: relative;
+			        z-index: 10;
+			        text-align: center;
+			        color: white;
+			        padding: 20px;
+			        margin-bottom: 20px;
+			        width: 100%;
+			    }
+			}
+
+			.brand-container {
+			    position: relative;
+			    margin-bottom: 40px;
+			}
+
+			.brand-name {
+			    font-size: clamp(3rem, 5vw, 4rem);
+			    font-weight: 700;
+			    letter-spacing: -2px;
+			    opacity: 0;
+			    transform: translateY(30px);
+			    animation:
+			        fadeInUp 0.6s ease-out 0.5s forwards,
+			        gradientShift 4s ease-in-out infinite alternate;
+			    position: relative;
+			    background: linear-gradient(90deg, #FF4D4D 0%, #FF8C66 25%, #66B2FF 75%, #4D4DFF 100%);
+			    background-size: 200% auto;
+			    -webkit-background-clip: text;
+			    background-clip: text;
+			    color: transparent;
+			    display: inline-block;
+			}
+
+			@keyframes gradientShift {
+			    0% {
+			        background-position: 0% 50%;
+			    }
+			    100% {
+			        background-position: 100% 50%;
+			    }
+			}
+
+			/* Removed special handling for R to make it appear with the rest of the text */
+
+			.tagline {
+			    font-size: clamp(1.2rem, 3vw, 1.8rem);
+			    font-weight: 300;
+			    margin-bottom: 40px;
+			    opacity: 0;
+			    transform: translateY(20px);
+			    animation: fadeInUp 0.6s ease-out 0.8s forwards;
+			    color: rgba(255, 255, 255, 0.9);
+			}
+
+			.cta-button {
+			    background: linear-gradient(45deg, #FFC107, #D4AF37);
+			    border: none;
+			    padding: 18px 40px;
+			    font-size: 1.1rem;
+			    font-weight: 600;
+			    color: #2E2E3A;
+			    border-radius: 50px;
+			    cursor: pointer;
+			    transition: all 0.3s ease;
+			    opacity: 0;
+			    transform: translateY(20px);
+			    animation: fadeInUp 0.6s ease-out 1.1s forwards;
+			    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+			}
+
+			.cta-button:hover {
+			    transform: translateY(-3px);
+			    box-shadow: 0 15px 40px rgba(255, 193, 7, 0.4);
+			    background: linear-gradient(45deg, #D4AF37, #FFC107);
+			}
+
+			@keyframes fadeInUp {
+			    to {
+			        opacity: 1;
+			        transform: translateY(0);
+			    }
+			}
+
+			.particle-r {
+			    position: absolute;
+			    top: 50%;
+			    left: 50%;
+			    transform: translate(-50%, -50%);
+			    width: 200px;
+			    height: 300px;
+			    z-index: 4;
+			    pointer-events: none;
+			}
+
+			@media (min-width: 1024px) {
+			    .globe-container {
+			        grid-template-columns: 1fr 35%;
+			        place-items: start center;
+			    }
+
+			    .hero {
+			        grid-column: 2; /* Animation on the right */
+			    }
+
+			    .hero-content {
+			        grid-column: 1; /* Text on the left */
+			        padding-right: 20rem; /* Give some space from the animation */
+			        text-align: left;
+			    }
+
+			    .hero-content-primary,
+			    .hero-content-secondary {
+			        display: none; /* Hide mobile versions on desktop */
+			    }
+
+			     #cobe {
+			        left: 30%; /* Changed from 30% */
+			        transform: translateX(-70%);
+			    }
+			      #particle-canvas {
+			          left: 70%;
+			          transform: translateX(-70%);
+			      }
+
+			    .particle-r {
+			        left: calc(70% - 30%); /* Adjusted for new layout */
+			        transform: translateX(-50%);
+			    }
+			}
+
+			/* Mobile-specific globe centering */
+			@media (max-width: 768px) {
+			     #cobe {
+			        position: fixed !important;
+			        top: 68% !important; /* moved down a bit */
+			        left: 50% !important;
+			        transform: translate(-50%, -50%) !important;
+			        width: 60vw !important;
+			        height: 60vh !important;
+			    }
+			      #particle-canvas {
+			          position: fixed !important;
+			          top: 58% !important; /* keep in sync with globe */
+			          left: 50% !important;
+			          transform: translate(-50%, -50%) !important;
+			          width: 60vw !important;
+			          height: 60vh !important;
+			      }
+
+			    /* Center flow container on mobile */
+			    .flow-container {
+			        right: auto;
+			        bottom: 4%;
+			        margin: 0 auto;
+			        padding: 1rem;
+			        scale: 0.8; /* slightly smaller to fit better on mobile */
+			    }
+
+            /* Make tech containers much smaller on mobile */
+            .tech-container {
+                width: 4.5rem;
+                height: 2.5rem;
+                padding: 0.5rem;
+                border-radius: 0.75rem;
+            }
+            .tech-logo {
+                width: 1.25rem;
+                height: 1.25rem;
+                margin-bottom: 0.25rem;
+            }
+            .tech-name { font-size: 0.75rem; }
+            .tech-description { font-size: 0.625rem; }
+
+            /* Position tech containers with percentages for consistency across different heights */
+            .pos-cloud { top: 45%; left: 4%; }
+            .pos-database { top: 52%; left: 12%; }
+            .pos-api { top: 52%; left: 50%; transform: translateX(-50%); }
+            .pos-analytics { top: 52%; right: 12%; }
+            .pos-security { top: 45%; right: 4%; }
+
+			    .particle-r {
+			        display: none; /* Hide particle-r on mobile for cleaner look */
+			    }
+			}
+
+			/* Glass Card Global Scaling */
+			.glass-card {
+			    transform: scale(2) translateY(-50%);
+			    transform-origin: right center;
+			}
+
+			/* Tablet and below */
+			@media (max-width: 1024px) {
+			    .glass-card {
+			        position: fixed;
+			        right: 3rem;
+			        left: 50%;
+			        top: auto;
+			        bottom: 1.5rem;
+			        width: 300px;
+			        max-width: 90vw;
+			        margin: 0;
+			        transform: translateX(-50%);
+			        transform-origin: center bottom;
+			    }
+			}
+
+			/* Large mobile and below */
+			@media (max-width: 768px) {
+			    .particle-r {
+			        width: 150px;
+			        height: 225px;
+			    }
+
+			    .glass-card {
+			        position: fixed;
+			        bottom: 1.5rem;
+			        top: auto;
+			        left: 50%;
+			        right: auto;
+			        transform: translateX(-50%);
+			        width: calc(100% - 2rem);
+			        max-width: 400px;
+			        margin: 0;
+			        opacity: 0.95;
+			    }
+
+			    /* Adjust card content for mobile */
+			    .glass-card .p-4 {
+			        padding: 0.75rem;
+			    }
+
+			    .glass-card h3 {
+			        font-size: 1rem;
+			        margin-bottom: 0.25rem;
+			    }
+
+			    .glass-card p {
+			        font-size: 0.875rem;
+			    }
+			}
+
+			/* Small mobile */
+			@media (max-width: 480px) {
+			    .glass-card {
+			        bottom: 1rem;
+			        width: calc(100% - 1.5rem);
+			    }
+
+			    /* Show card but make it more compact */
+			    .glass-card {
+			        display: block !important;
+			        opacity: 0.98;
+			    }
+			}
+
+			/* Very small screens */
+			@media (max-width: 360px) {
+			    .glass-card {
+			        transform: translateX(-50%) scale(0.9);
+			        transform-origin: bottom center;
+			    }
+			}
+
+
+			.mb-2 {
+			    margin-bottom: 10px;
+			}
+
+			/* Glass Database Card Styles */
+			.glass {
+			    background: rgba(40, 40, 45, 0.50);
+			    backdrop-filter: blur(20px);
+			    -webkit-backdrop-filter: blur(20px);
+			}
+
+			.gradient-border {
+			    position: relative;
+			    background: linear-gradient(135deg, rgba(80, 80, 90, 0.35), rgba(120, 120, 130, 0.35), rgba(60, 60, 70, 0.35));
+			}
+
+			.gradient-border::before {
+			    content: '';
+			    position: absolute;
+			    inset: 0;
+			    padding: 2px;
+			    background: linear-gradient(135deg, #444950, #6b7280, #a3a3a3, #e5e7eb);
+			    border-radius: inherit;
+			    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			    mask-composite: xor;
+			    -webkit-mask-composite: xor;
+			}
+
+			.inner-glow {
+			    box-shadow:
+			        inset 0 0 20px rgba(120, 120, 130, 0.18),
+			        inset 0 0 40px rgba(60, 60, 70, 0.12),
+			        0 0 30px rgba(180, 180, 190, 0.18);
+			}
+
+			.card-border {
+			    background: rgba(60, 60, 70, 0.40);
+			    border: 1px solid rgba(120, 120, 130, 0.25);
+			    backdrop-filter: blur(20px);
+			    -webkit-backdrop-filter: blur(20px);
+			    box-shadow:
+			        0 0 0 1px rgba(120, 120, 130, 0.18),
+			        inset 0 0 30px rgba(60, 60, 70, 0.10),
+			        inset 0 0 60px rgba(180, 180, 190, 0.04),
+			        0 0 50px rgba(180, 180, 190, 0.10);
+			}
+
+			/* Animations */
+			@keyframes float {
+			    0%, 100% { transform: translateY(0); }
+			    50% { transform: translateY(-10px); }
+			}
+
+			@keyframes dataStream {
+			    0% { stroke-dashoffset: 0; }
+			    100% { stroke-dashoffset: 16; }
+			}
+
+			.animate-float {
+			    animation: float 6s ease-in-out infinite;
+			}
+
+			.animate-schema-pulse {
+			    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+			}
+
+			@keyframes pulse {
+			    0%, 100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+			    50% { transform: translate(-50%, 0) scale(1.05); opacity: 0.8; }
+			}
+
+			@media (max-width: 768px) {
+			    .optimize {
+			        visibility: hidden;
+			    }
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Navigation Bar -->
+
+		<!-- Add padding to account for fixed navbar -->
+
+		<div class="globe-container relative">
+			<canvas id="dynamic-background"></canvas>
+
+			<!-- Mobile Primary Hero Content (Above Globe) -->
+			<div class="hero-content-primary">
+				<div class="brand-container">
+					<h1 class="brand-name" style="font-size: clamp(2rem, 4vw, 3rem)">
+						<span class="brand-r">Outsource your</span> overthinking.
+					</h1>
+				</div>
+				<div
+					class="tagline mb-2"
+					style="font-size: clamp(1rem, 2.5vw, 1.5rem); margin-bottom: 20px"
+				>
+					Your values => your route.
+				</div>
+			</div>
+
+			<!-- Desktop Hero Content -->
+			<div class="hero-content">
+				<div class="brand-container">
+					<h1 class="brand-name">
+						<span class="brand-r" id="brand-r">Outsource your</span>
+						overthinking.
+					</h1>
+				</div>
+				<div class="tagline mb-2">Your values => your route.</div>
+				<div
+					class="subheader"
+					style="
+						color: rgba(255, 255, 255, 0.8);
+						font-size: 1rem;
+						max-width: 800px;
+						margin: 0 0 3rem 0;
+						opacity: 0;
+						animation: fadeInUp 0.6s ease-out 1.4s forwards;
+					"
+				>
+					<p>Tell Rhizal what matters—carbon, cost, speed, or performance.</p>
+					<p>Set it, forget it. No need for tracking endless releases.</p>
+				</div>
+				<button
+					class="cta-button"
+					onclick="window.location.href='mailto:hello@routly.xyz'"
+				>
+					Get Early Access
+				</button>
+			</div>
+
+			<!-- Globe Section (Centered on Mobile) -->
+			<section class="hero">
+				<div id="cycle-word-container">
+					<div class="optimize">Optimize for</div>
+					<div id="cycle-word">Balance</div>
+				</div>
+				<canvas id="particle-canvas"></canvas>
+				<div class="flow-container">
+					<!-- Main Flow Diagram Container -->
+					<div class="diagram-container">
+						<!-- SVG Flow Pathways -->
+						<svg
+							class="svg-pathways"
+							viewBox="0 0 800 600"
+							preserveAspectRatio="xMidYMid meet"
+						> 
+							<defs>
+								<linearGradient
+									id="pathGradient"
+									x1="0%"
+									y1="0%"
+									x2="0%"
+									y2="100%"
+								>
+									<stop
+										offset="0%"
+										style="stop-color: var(--cyan-glow); stop-opacity: 1"
+									/>
+									<stop
+										offset="100%"
+										style="stop-color: var(--electric-blue); stop-opacity: 0.6"
+									/>
+								</linearGradient>
+
+								<filter id="glow">
+									<feGaussianBlur stdDeviation="3" result="coloredBlur" />
+									<feMerge>
+										<feMergeNode in="coloredBlur" />
+										<feMergeNode in="SourceGraphic" />
+									</feMerge>
+								</filter>
+							</defs>
+
+							<!-- Main vertical pathway -->
+							<path
+								d="M400 50 L400 150"
+								class="main-current"
+								filter="url(#glow)"
+							/>
+
+							<!-- Branching pathways -->
+							<path
+								d="M400 150 Q400 200 250 250 Q200 280 150 320"
+								class="branch-current"
+								filter="url(#glow)"
+							/>
+							<path
+								d="M400 150 Q380 200 300 280 Q280 300 250 350"
+								class="branch-current"
+								filter="url(#glow)"
+							/>
+							<path
+								d="M400 150 Q400 200 400 280 Q400 300 400 350"
+								class="branch-current"
+								filter="url(#glow)"
+							/>
+							<path
+								d="M400 150 Q420 200 500 280 Q520 300 550 350"
+								class="branch-current"
+								filter="url(#glow)"
+							/>
+							<path
+								d="M400 150 Q400 200 550 250 Q600 280 650 320"
+								class="branch-current"
+								filter="url(#glow)"
+							/>
+
+							<!-- Animated particles -->
+							<circle r="4" class="current-particle particle-1">
+								<animateMotion dur="3s" repeatCount="indefinite">
+									<mpath href="#path1" />
+								</animateMotion>
+							</circle>
+							<circle r="4" class="current-particle particle-2">
+								<animateMotion dur="3s" repeatCount="indefinite">
+									<mpath href="#path2" />
+								</animateMotion>
+							</circle>
+							<circle r="4" class="current-particle particle-3">
+								<animateMotion dur="3s" repeatCount="indefinite">
+									<mpath href="#path3" />
+								</animateMotion>
+							</circle>
+							<circle r="4" class="current-particle particle-4">
+								<animateMotion dur="3s" repeatCount="indefinite">
+									<mpath href="#path4" />
+								</animateMotion>
+							</circle>
+							<circle r="4" class="current-particle particle-5">
+								<animateMotion dur="3s" repeatCount="indefinite">
+									<mpath href="#path5" />
+								</animateMotion>
+							</circle>
+
+							<!-- Hidden paths for particle animation -->
+							<path
+								id="path1"
+								d="M400 50 L400 150 Q400 200 250 250 Q200 280 150 320"
+								style="display: none"
+							/>
+							<path
+								id="path2"
+								d="M400 50 L400 150 Q380 200 300 280 Q280 300 250 350"
+								style="display: none"
+							/>
+							<path
+								id="path3"
+								d="M400 50 L400 150 Q400 200 400 280 Q400 300 400 350"
+								style="display: none"
+							/>
+							<path
+								id="path4"
+								d="M400 50 L400 150 Q420 200 500 280 Q520 300 550 350"
+								style="display: none"
+							/>
+							<path
+								id="path5"
+								d="M400 50 L400 150 Q400 200 550 250 Q600 280 650 320"
+								style="display: none"
+							/>
+						</svg>
+
+						<!-- Source Power Container -->
+						<!-- <div class="power-source glassmorphism">
+							<div class="power-indicator"></div>
+							<span class="power-label">PWR</span>
+						</div> -->
+
+						<!-- Tech Containers -->
+						<div class="tech-container glassmorphism pos-cloud" data-index="0">
+							<div class="tech-logo">
+								<!-- OpenAI symbol (flattened to currentColor; background hidden via .st15 rule) -->
+								<svg viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-label="OpenAI">
+									<g id="图层_1">
+										<path class="st15" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
+											C28.51,26.72,26.72,28.51,24.51,28.51z"/>
+										<g>
+											<g>
+												<g>
+													<g>
+														<path d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
+														<polygon points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
+														<path d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
+													</g>
+												</g>
+											</g>
+										</g>
+									</g>
+								</svg>
+							</div>
+						</div>
+
+						<div class="tech-container glassmorphism pos-database" data-index="1">
+							<div class="tech-logo">
+								<!-- Qwen logo (flattened) -->
+								<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Qwen">
+									<path d="M174.82 108.75L155.38 75L165.64 57.75C166.46 56.31 166.46 54.53 165.64 53.09L155.38 35.84C154.86 34.91 153.87 34.33 152.78 34.33H114.88L106.14 19.03C105.62 18.1 104.63 17.52 103.54 17.52H83.3C82.21 17.52 81.22 18.1 80.7 19.03L61.26 52.77H41.02C39.93 52.77 38.94 53.35 38.42 54.28L28.16 71.53C27.34 72.97 27.34 74.75 28.16 76.19L45.52 107.5L36.78 122.8C35.96 124.24 35.96 126.02 36.78 127.46L47.04 144.71C47.56 145.64 48.55 146.22 49.64 146.22H87.54L96.28 161.52C96.8 162.45 97.79 163.03 98.88 163.03H119.12C120.21 163.03 121.2 162.45 121.72 161.52L141.16 127.78H158.52C159.61 127.78 160.6 127.2 161.12 126.27L171.38 109.02C172.2 107.58 172.2 105.8 171.38 104.36L174.82 108.75Z"/>
+									<path d="M119.12 163.03H98.88L87.54 144.71H49.64L61.26 126.39H80.7L38.42 55.29H61.26L83.3 19.03L93.56 37.35L83.3 55.29H161.58L151.32 72.54L170.76 106.28H151.32L141.16 88.34L101.18 163.03H119.12Z"/>
+									<path d="M127.86 79.83H76.14L101.18 122.11L127.86 79.83Z"/>
+								</svg>
+							</div>
+						</div>
+
+						<div class="tech-container glassmorphism pos-api" data-index="2">
+							<div class="tech-logo">
+								<!-- Mistral logo (flattened) -->
+								<svg viewBox="0 0 158.7128 157.296" xmlns="http://www.w3.org/2000/svg" aria-label="Mistral">
+									<path d="M60.8734,57.2556v-14.9432c0-1.2586.4722-2.2029,1.5728-2.8314l30.0443-17.3023c4.0899-2.3593,8.9662-3.4599,13.9988-3.4599,18.8759,0,30.8307,14.6289,30.8307,30.2006,0,1.1007,0,2.3593-.158,3.6178l-31.1446-18.2467c-1.8872-1.1006-3.7754-1.1006-5.6629,0l-39.4812,22.9651ZM131.0276,115.4561v-35.7074c0-2.2028-.9446-3.7756-2.8318-4.8763l-39.481-22.9651,12.8982-7.3934c1.1007-.6285,2.0453-.6285,3.1458,0l30.0441,17.3024c8.6523,5.0341,14.4708,15.7296,14.4708,26.1107,0,11.9539-7.0769,22.965-18.2461,27.527v.0021ZM51.593,83.9964l-12.8982-7.5497c-1.1007-.6285-1.5728-1.5728-1.5728-2.8314v-34.6048c0-16.8303,12.8982-29.5722,30.3585-29.5722,6.607,0,12.7403,2.2029,17.9324,6.1349l-30.987,17.9324c-1.8871,1.1007-2.8314,2.6735-2.8314,4.8764v45.6159l-.0014-.0015ZM79.3562,100.0403l-18.4829-10.3811v-22.0209l18.4829-10.3811,18.4812,10.3811v22.0209l-18.4812,10.3811ZM91.2319,147.8591c-6.607,0-12.7403-2.2031-17.9324-6.1344l30.9866-17.9333c1.8872-1.1005,2.8318-2.6728,2.8318-4.8759v-45.616l13.0564,7.5498c1.1005.6285,1.5723,1.5728,1.5723,2.8314v34.6051c0,16.8297-13.0564,29.5723-30.5147,29.5723v.001ZM53.9522,112.7822l-30.0443-17.3024c-8.652-5.0343-14.471-15.7296-14.471-26.1107,0-12.1119,7.2356-22.9652,18.403-27.5272v35.8634c0,2.2028.9443,3.7756,2.8314,4.8763l39.3248,22.8068-12.8982,7.3938c-1.1007.6287-2.045.6287-3.1456,0ZM52.2229,138.5791c-17.7745,0-30.8306-13.3713-30.8306-29.8871,0-1.2585.1578-2.5169.3143-3.7754l30.987,17.9323c1.8871,1.1005,3.7757,1.1005,5.6628,0l39.4811-22.807v14.9435c0,1.2585-.4721,2.2021-1.5728,2.8308l-30.0443,17.3025c-4.0898,2.359-8.9662,3.4605-13.9989,3.4605h.0014ZM91.2319,157.296c19.0327,0,34.9188-13.5272,38.5383-31.4594,17.6164-4.562,28.9425-21.0779,28.9425-37.908,0-11.0112-4.719-21.7066-13.2133-29.4143.7867-3.3035,1.2595-6.607,1.2595-9.909,0-22.4929-18.2471-39.3247-39.3251-39.3247-4.2461,0-8.3363.6285-12.4262,2.045-7.0792-6.9213-16.8318-11.3254-27.5271-11.3254-19.0331,0-34.9191,13.5268-38.5384,31.4591C11.3255,36.0212,0,52.5373,0,69.3675c0,11.0112,4.7184,21.7065,13.2125,29.4142-.7865,3.3035-1.2586,6.6067-1.2586,9.9092,0,22.4923,18.2466,39.3241,39.3248,39.3241,4.2462,0,8.3362-.6277,12.426-2.0441,7.0776,6.921,16.8302,11.3251,27.5271,11.3251Z"/>
+								</svg>
+							</div>
+						</div>
+
+						<div class="tech-container glassmorphism pos-analytics" data-index="3">
+							<div class="tech-logo">
+								<!-- GLM logo (flattened) -->
+								<svg viewBox="0 0 129 91" xmlns="http://www.w3.org/2000/svg" aria-label="GLM">
+									<g>
+										<rect x="18.292" y="0" width="18.293" height="18.123"/>
+										<rect x="91.473" y="0" width="18.293" height="18.123"/>
+										<rect x="18.292" y="18.121" width="36.586" height="18.123"/>
+										<rect x="73.181" y="18.121" width="36.586" height="18.123"/>
+										<rect x="18.292" y="36.243" width="91.476" height="18.122"/>
+										<rect x="18.292" y="54.37" width="18.293" height="18.123"/>
+										<rect x="54.883" y="54.37" width="18.293" height="18.123"/>
+										<rect x="91.473" y="54.37" width="18.293" height="18.123"/>
+										<rect x="0" y="72.504" width="54.89" height="18.123"/>
+										<rect x="73.181" y="72.504" width="54.89" height="18.123"/>
+									</g>
+								</svg>
+							</div>
+						</div>
+
+						<div class="tech-container glassmorphism pos-security" data-index="4">
+							<div class="tech-logo">
+								<!-- Meta logo (flattened) -->
+								<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Meta">
+									<path d="M6.897 4h-.024l-.031 2.615h.022c1.715 0 3.046 1.357 5.94 6.246l.175.297.012.02 1.62-2.438-.012-.019a48.763 48.763 0 00-1.098-1.716 28.01 28.01 0 00-1.175-1.629C10.413 4.932 8.812 4 6.896 4z"></path>
+									<path d="M6.873 4C4.95 4.01 3.247 5.258 2.02 7.17a4.352 4.352 0 00-.01.017l2.254 1.231.011-.017c.718-1.083 1.61-1.774 2.568-1.785h.021L6.896 4h-.023z"></path>
+									<path d="M2.019 7.17l-.011.017C1.2 8.447.598 9.995.274 11.664l-.005.022 2.534.6.004-.022c.27-1.467.786-2.828 1.456-3.845l.011-.017L2.02 7.17z"></path>
+									<path d="M2.807 12.264l-2.533-.6-.005.022c-.177.918-.267 1.851-.269 2.786v.023l2.598.233v-.023a12.591 12.591 0 01.21-2.44z"></path>
+									<path d="M2.677 15.537a5.462 5.462 0 01-.079-.813v-.022L0 14.468v.024a8.89 8.89 0 00.146 1.652l2.535-.585a4.106 4.106 0 01-.004-.022z"></path>
+									<path d="M3.27 16.89c-.284-.31-.484-.756-.589-1.328l-.004-.021-2.535.585.004.021c.192 1.01.568 1.85 1.106 2.487l.014.017 2.018-1.745a2.106 2.106 0 01-.015-.016z"></path>
+									<path d="M10.78 9.654c-1.528 2.35-2.454 3.825-2.454 3.825-2.035 3.2-2.739 3.917-3.871 3.917a1.545 1.545 0 01-1.186-.508l-2.017 1.744.014.017C2.01 19.518 3.058 20 4.356 20c1.963 0 3.374-.928 5.884-5.33l1.766-3.13a41.283 41.283 0 00-1.227-1.886z"></path>
+									<path d="M13.502 5.946l-.016.016c-.4.43-.786.908-1.16 1.416.378.483.768 1.024 1.175 1.63.48-.743.928-1.345 1.367-1.807l.016-.016-1.382-1.24z"></path>
+									<path d="M20.918 5.713C19.853 4.633 18.583 4 17.225 4c-1.432 0-2.637.787-3.723 1.944l-.016.016 1.382 1.24.016-.017c.715-.747 1.408-1.12 2.176-1.12.826 0 1.6.39 2.27 1.075l.015.016 1.589-1.425-.016-.016z"></path>
+									<path d="M23.998 14.125c-.06-3.467-1.27-6.566-3.064-8.396l-.016-.016-1.588 1.424.015.016c1.35 1.392 2.277 3.98 2.361 6.971v.023h2.292v-.022z"></path>
+									<path d="M23.998 14.15v-.023h-2.292v.022c.004.14.006.282.006.424 0 .815-.121 1.474-.368 1.95l-.011.022 1.708 1.782.013-.02c.62-.96.946-2.293.946-3.91 0-.083 0-.165-.002-.247z"></path>
+									<path d="M21.344 16.52l-.011.02c-.214.402-.519.67-.917.787l.778 2.462a3.493 3.493 0 00.438-.182 3.558 3.558 0 001.366-1.218l.044-.065.012-.02-1.71-1.784z"></path>
+									<path d="M19.92 17.393c-.262 0-.492-.039-.718-.14l-.798 2.522c.449.153.927.222 1.46.222.492 0 .943-.073 1.352-.215l-.78-2.462c-.167.05-.341.075-.517.073z"></path>
+									<path d="M18.323 16.534l-.014-.017-1.836 1.914.016.017c.637.682 1.246 1.105 1.937 1.337l.797-2.52c-.291-.125-.573-.353-.9-.731z"></path>
+									<path d="M18.309 16.515c-.55-.642-1.232-1.712-2.303-3.44l-1.396-2.336-.011-.02-1.62 2.438.012.02.989 1.668c.959 1.61 1.74 2.774 2.493 3.585l.016.016 1.834-1.914a2.353 2.353 0 01-.014-.017z"></path>
+								</svg>
+							</div>
+						</div>
+
+						<!-- Control Panel -->
+						<!-- <div class="control-panel glassmorphism">
+							<button id="playBtn" class="control-button active">Play</button>
+							<button id="pauseBtn" class="control-button inactive">
+								Pause
+							</button>
+							<div class="speed-control">
+								<label class="speed-label">Speed:</label>
+								<input
+									type="range"
+									id="speedSlider"
+									class="speed-slider"
+									min="0.5"
+									max="3"
+									step="0.1"
+									value="1"
+								/>
+								<span id="speedValue" class="speed-value">1.0x</span>
+							</div>
+						</div> -->
+					</div>
+				</div>
+				<canvas id="cobe" style="width: 100%; height: 100%"></canvas>
+				<div class="particle-r" id="particle-r"></div>
+			</section>
+
+			<!-- Mobile Secondary Hero Content (Below Globe) -->
+			<div class="hero-content-secondary">
+				<div
+					class="subheader"
+					style="
+						color: rgba(255, 255, 255, 0.8);
+						font-size: 0.9rem;
+						margin: 0 0 2rem 0;
+					"
+				>
+					<p>Tell Rhizal what matters—carbon, cost, speed, or performance.</p>
+					<p>Set it, forget it. No need for tracking endless releases.</p>
+				</div>
+				<button
+					class="cta-button"
+					onclick="window.location.href='mailto:hello@routly.xyz'"
+					style="margin: 0 auto; display: block"
+				>
+					Get Early Access
+				</button>
+			</div>
+		</div>
+
+		<script>
+            // Stabilize mobile viewport height by setting a CSS variable based on innerHeight
+            (function setRealVhUnit() {
+                function apply() {
+                    const vh = window.innerHeight * 0.01;
+                    document.documentElement.style.setProperty('--vh', `${vh}px`);
+                }
+                apply();
+                window.addEventListener('resize', apply);
+                window.addEventListener('orientationchange', apply);
+            })();
+
+			// Three.js setup
+			let scene,
+				camera,
+				renderer,
+				particles = [];
+			let globe,
+				globePoints = [];
+			// Animation state
+			let animationStarted = false;
+            let wordCycleIntervalId = null;
+
+			let animationPhase = 'swirling'; // swirling, converging, consolidating, dispersing
+
+			// Master cycle state
+			const cycleWords = [
+				{ label: 'clean', color: '#28A745' },
+				{ label: 'performance', color: '#0066CC' },
+				{ label: 'cost', color: '#FFC107' },
+				{ label: 'speed', color: '#E63946' },
+			];
+			let masterCycleIndex = 0;
+			let baseRotationRadians = 0;
+			let targetRotationRadians = 0;
+
+			// Spring state for smooth animations
+			const springConfig = {
+				stiffness: 0.015, // Much softer spring for slower background rotation
+				damping: 0.8,
+				mass: 1,
+				velocity: 0,
+				precision: 0.001,
+			};
+
+			// Spring helper function
+			function applySpring(current, target, state) {
+				const force = (target - current) * state.stiffness;
+				state.velocity += force / state.mass;
+				state.velocity *= state.damping;
+
+				const newValue = current + state.velocity;
+
+				// Check if we're close enough to the target
+				if (
+					Math.abs(newValue - target) < state.precision &&
+					Math.abs(state.velocity) < state.precision
+				) {
+					state.velocity = 0;
+					return target;
+				}
+
+				return newValue;
+			}
+
+			// Animation state
+			let phaseStartTime = 0;
+
+			// Dynamic background setup
+			let backgroundCanvas, backgroundCtx;
+			let globeRotation = 0;
+
+			// 5 points on the globe where particles originate
+			const globeOriginPoints = [
+				// { lat: 40.7128, lon: -74.006 }, // New York
+				// { lat: 51.5074, lon: -0.1278 }, // London
+				// { lat: 35.6762, lon: 139.6503 }, // Tokyo
+				// { lat: -33.8688, lon: 151.2093 }, // Sydney
+				// { lat: -22.9068, lon: -43.1729 }, // Rio de Janeiro
+			];
+			// Globe origin points for consolidation (5 points on the globe)
+			const globeConsolidationPoints = [
+				{ lat: 0, lon: 0 }, // Front center
+				{ lat: 45, lon: 0 }, // Upper front
+				{ lat: -45, lon: 0 }, // Lower front
+				{ lat: 0, lon: 90 }, // Right side
+				{ lat: 0, lon: -90 }, // Left side
+			];
+
+			function initDynamicBackground() {
+				backgroundCanvas = document.getElementById('dynamic-background');
+				backgroundCtx = backgroundCanvas.getContext('2d');
+
+				// Set canvas size
+				backgroundCanvas.width = window.innerWidth;
+				backgroundCanvas.height = window.innerHeight;
+			}
+
+			function renderDynamicBackground() {
+				if (!backgroundCtx) return;
+
+				// Calculate center based on container's position
+				let centerX, centerY;
+				if (window.innerWidth >= 1024) {
+					// On desktop, center the gradient in the right column (35% width, centered)
+					centerX = backgroundCanvas.width * (1 - 0.35 / 1);
+				} else {
+					// On mobile, keep it centered
+					centerX = backgroundCanvas.width / 2;
+				}
+				centerY = backgroundCanvas.height / 2;
+
+				const maxRadius =
+					Math.max(backgroundCanvas.width, backgroundCanvas.height) * 0.7;
+
+				// Clear canvas
+				backgroundCtx.clearRect(
+					0,
+					0,
+					backgroundCanvas.width,
+					backgroundCanvas.height
+				);
+
+				// Update base rotation with spring physics
+				baseRotationRadians = applySpring(
+					baseRotationRadians,
+					targetRotationRadians,
+					springConfig
+				);
+
+				// Create rotating gradient with 4 directional colors
+				const gradient = backgroundCtx.createRadialGradient(
+					centerX,
+					centerY,
+					0,
+					centerX,
+					centerY,
+					maxRadius
+				);
+
+				// Use the base rotation with spring for smooth transitions
+				const rotation = baseRotationRadians;
+
+				// Define 4 directional colors (North, East, South, West)
+				const colors = [
+					'#0066CC', // Primary Tech Blue (North)
+					'#E63946', // Vibrant Red (East) - Replacing purple
+					'#28A745', // Eco Green (South)
+					'#17A2B8', // Energy Teal (West)
+				];
+
+				// Create multiple overlapping gradients for smooth color transitions
+				for (let i = 0; i < 4; i++) {
+					const angle = (i * Math.PI) / 2 + rotation;
+					const offsetX = Math.cos(angle) * maxRadius * 0.3;
+					const offsetY = Math.sin(angle) * maxRadius * 0.3;
+
+					const dirGradient = backgroundCtx.createRadialGradient(
+						centerX + offsetX,
+						centerY + offsetY,
+						0,
+						centerX + offsetX,
+						centerY + offsetY,
+						maxRadius * 0.6
+					);
+
+					dirGradient.addColorStop(0, colors[i] + '00'); // Transparent at center
+					dirGradient.addColorStop(0.6, colors[i] + '20'); // Very faint
+					dirGradient.addColorStop(0.8, colors[i] + '40'); // Slightly visible
+					dirGradient.addColorStop(1, colors[i] + '80'); // More visible at edges
+
+					backgroundCtx.fillStyle = dirGradient;
+					backgroundCtx.globalCompositeOperation = 'screen';
+					backgroundCtx.fillRect(
+						0,
+						0,
+						backgroundCanvas.width,
+						backgroundCanvas.height
+					);
+				}
+
+				// Add central fade to black - starts fading 50% sooner with gentler transition
+				const centerFade = backgroundCtx.createRadialGradient(
+					centerX,
+					centerY,
+					0,
+					centerX,
+					centerY,
+					maxRadius * 0.7
+				);
+				centerFade.addColorStop(0, 'rgba(0, 0, 0, 0.95)');
+				centerFade.addColorStop(0.3, 'rgba(0, 0, 0, 0.8)');
+				centerFade.addColorStop(0.6, 'rgba(0, 0, 0, 0.4)');
+				centerFade.addColorStop(0.85, 'rgba(0, 0, 0, 0.1)');
+				centerFade.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+				backgroundCtx.globalCompositeOperation = 'multiply';
+				backgroundCtx.fillStyle = centerFade;
+				backgroundCtx.fillRect(
+					0,
+					0,
+					backgroundCanvas.width,
+					backgroundCanvas.height
+				);
+
+				// Add a fade to black on the left side for desktop
+				if (window.innerWidth >= 1024) {
+					const leftFade = backgroundCtx.createLinearGradient(
+						0,
+						0,
+						backgroundCanvas.width * 0.5,
+						0
+					);
+					leftFade.addColorStop(0, 'rgba(0,0,0,1)');
+					leftFade.addColorStop(0.5, 'rgba(0,0,0,0.5)');
+					leftFade.addColorStop(1, 'rgba(0,0,0,0)');
+
+					backgroundCtx.fillStyle = leftFade;
+					backgroundCtx.fillRect(
+						0,
+						0,
+						backgroundCanvas.width * 0.5,
+						backgroundCanvas.height
+					);
+				}
+
+				// Reset composite operation
+				backgroundCtx.globalCompositeOperation = 'source-over';
+			}
+
+			function init() {
+				// Initialize dynamic background
+				initDynamicBackground();
+
+				// Initialize word label
+				const wordElement = document.getElementById('cycle-word');
+				const wordContainer = document.getElementById('cycle-word-container');
+
+				// Set initial word and color
+				updateCycleWord(0);
+
+				// Scene setup
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera(
+					75,
+					window.innerWidth / window.innerHeight,
+					0.1,
+					1000
+				);
+				renderer = new THREE.WebGLRenderer({
+					canvas: document.getElementById('particle-canvas'),
+					alpha: true,
+				});
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				renderer.setClearColor(0x000000, 0);
+
+				camera.position.z = 5;
+
+				// Create globe
+				createGlobe();
+
+				// Create particles
+				createParticles();
+
+				// Start animation after a brief delay
+				setTimeout(() => {
+					animationStarted = true;
+					phaseStartTime = Date.now();
+					// Start with the first word visible
+					updateCycleWord(masterCycleIndex);
+					document.getElementById('cycle-word-container').style.opacity = '1';
+				}, 1000);
+
+                // Fallback cycle when particles are disabled (no THREE.Points in scene)
+                if (!wordCycleIntervalId) {
+                    wordCycleIntervalId = setInterval(() => {
+                        const hasPoints = scene.children.some((child) => child.type === 'Points');
+                        if (!hasPoints) {
+                            advanceCycle();
+                        }
+                    }, 5000);
+                }
+
+				// Animation loop
+				animate();
+			}
+
+			function updateCycleWord(index) {
+				const wordElement = document.getElementById('cycle-word');
+				const wordContainer = document.getElementById('cycle-word-container');
+
+				if (wordElement && wordContainer) {
+					// Fade out
+					wordContainer.style.opacity = '0';
+
+					// After fade out, update word and color, then fade in
+					setTimeout(() => {
+						const wordData = cycleWords[index];
+						wordElement.textContent = wordData.label;
+						wordElement.style.color = wordData.color;
+						wordContainer.style.opacity = '1';
+
+						// Sync Cobe globe marker color
+						if (window.setCobeMarkerColor) {
+							window.setCobeMarkerColor(wordData.color);
+						}
+
+						// Sync SVG flow particle color with the current text color
+						document.documentElement.style.setProperty('--flow-particle-color', wordData.color);
+					}, 300);
+				}
+			}
+
+			function advanceCycle() {
+				masterCycleIndex = (masterCycleIndex + 1) % cycleWords.length;
+				targetRotationRadians = -masterCycleIndex * (Math.PI / 2);
+				updateCycleWord(masterCycleIndex);
+			}
+
+			function latLonToVector3(lat, lon, radius) {
+				const phi = (90 - lat) * (Math.PI / 180);
+				const theta = (lon + 180) * (Math.PI / 180);
+
+				const x = -(radius * Math.sin(phi) * Math.cos(theta));
+				const z = radius * Math.sin(phi) * Math.sin(theta);
+				const y = radius * Math.cos(phi);
+
+				return new THREE.Vector3(x, y, z);
+			}
+
+			function createGlobe() {
+				const globeRadius = 3.5; // Increased from 2 to 3.5
+				const geometry = new THREE.SphereGeometry(globeRadius, 32, 32);
+				const material = new THREE.MeshBasicMaterial({
+					color: 0x17a2b8,
+					transparent: true,
+					opacity: 0.4,
+					wireframe: true,
+				});
+				globe = new THREE.Mesh(geometry, material);
+				globe.position.set(0, 0, -5.8); // Moved further back to accommodate larger size
+
+				// Create points on the globe for particle origins
+				globeOriginPoints.forEach((point, index) => {
+					const position = latLonToVector3(point.lat, point.lon, globeRadius);
+					position.add(globe.position);
+					globePoints.push(position);
+
+					// Visual markers for origin points (scaled up slightly)
+					const markerGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+					const markerMaterial = new THREE.MeshBasicMaterial({
+						color: 0x6f42c1,
+						transparent: true,
+						opacity: 0.8,
+					});
+					const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+					marker.position.copy(position);
+					scene.add(marker);
+				});
+			}
+			function createCircleTexture() {
+				const canvas = document.createElement('canvas');
+				canvas.width = 64;
+				canvas.height = 64;
+				const ctx = canvas.getContext('2d');
+
+				// Create a circular gradient
+				const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+				gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+				gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.9)');
+				gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, 64, 64);
+
+				const texture = new THREE.CanvasTexture(canvas);
+				return texture;
+			}
+
+			function createCircleTexture() {
+				const canvas = document.createElement('canvas');
+				canvas.width = 64;
+				canvas.height = 64;
+				const ctx = canvas.getContext('2d');
+
+				// Create a circular gradient
+				const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+				gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+				gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.9)');
+				gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, 64, 64);
+
+				const texture = new THREE.CanvasTexture(canvas);
+				return texture;
+			}
+
+			function createParticles() {
+				const particleCount = 1200;
+				const geometry = new THREE.BufferGeometry();
+				const positions = new Float32Array(particleCount * 3);
+				const colors = new Float32Array(particleCount * 3);
+				const globeRadius = 3.5;
+
+				for (let i = 0; i < particleCount; i++) {
+					// Distribute particles randomly across the entire globe surface
+					const phi = Math.acos(2 * Math.random() - 1); // Random latitude
+					const theta = 2 * Math.PI * Math.random(); // Random longitude
+
+					// Convert spherical coordinates to cartesian
+					const x = -(globeRadius * Math.sin(phi) * Math.cos(theta));
+					const z = globeRadius * Math.sin(phi) * Math.sin(theta);
+					const y = globeRadius * Math.cos(phi);
+
+					// Add globe position offset and small random variation
+					const offset = new THREE.Vector3(
+						(Math.random() - 0.5) * 0.1,
+						(Math.random() - 0.5) * 0.1,
+						(Math.random() - 0.5) * 0.1
+					);
+
+					positions[i * 3] = x + globe.position.x + offset.x;
+					positions[i * 3 + 1] = y + globe.position.y + offset.y;
+					positions[i * 3 + 2] = z + globe.position.z + offset.z;
+
+					// Assign each particle to a consolidation point for later use
+					const consolidationIndex = i % globeConsolidationPoints.length;
+
+					// Color variations using brand palette
+					const colorVariant = Math.random();
+					if (colorVariant < 0.25) {
+						// Primary Tech Blue #0066CC
+						colors[i * 3] = 0.0; // R
+						colors[i * 3 + 1] = 0.4; // G
+						colors[i * 3 + 2] = 0.8; // B
+					} else if (colorVariant < 0.5) {
+						// Energy Teal #17A2B8
+						colors[i * 3] = 0.09; // R
+						colors[i * 3 + 1] = 0.635; // G
+						colors[i * 3 + 2] = 0.72; // B
+					} else if (colorVariant < 0.75) {
+						// Precision Purple #6F42C1
+						colors[i * 3] = 0.435; // R
+						colors[i * 3 + 1] = 0.26; // G
+						colors[i * 3 + 2] = 0.757; // B
+					} else {
+						// Optimised Orange #FFC107
+						colors[i * 3] = 1.0; // R
+						colors[i * 3 + 1] = 0.757; // G
+						colors[i * 3 + 2] = 0.027; // B
+					}
+
+					// Particle data
+					// Assign a subtle random veer/arc vector for each particle
+					const veerAmplitude = 0.3 + Math.random() * 0.2; // 0.13-0.2
+					const veerTheta = Math.random() * 2 * Math.PI;
+					const veerPhi = Math.acos(2 * Math.random() - 1);
+					const veerX = Math.sin(veerPhi) * Math.cos(veerTheta) * veerAmplitude;
+					const veerY = Math.cos(veerPhi) * veerAmplitude;
+					const veerZ = Math.sin(veerPhi) * Math.sin(veerTheta) * veerAmplitude;
+
+					particles.push({
+						originalX: positions[i * 3],
+						originalY: positions[i * 3 + 1],
+						originalZ: positions[i * 3 + 2],
+						consolidationIndex: consolidationIndex,
+						targetX: 0,
+						targetY: 0,
+						targetZ: 0,
+						hasTarget: false,
+						speed: 0.02 + Math.random() * 0.03,
+						index: i,
+						veerX,
+						veerY,
+						veerZ,
+						// Per-particle spring state for consolidation
+						springX: {
+							stiffness: 0.04,
+							damping: 0.85,
+							mass: 1,
+							velocity: 0,
+							precision: 0.001,
+						},
+						springY: {
+							stiffness: 0.04,
+							damping: 0.85,
+							mass: 1,
+							velocity: 0,
+							precision: 0.001,
+						},
+						springZ: {
+							stiffness: 0.04,
+							damping: 0.85,
+							mass: 1,
+							velocity: 0,
+							precision: 0.001,
+						},
+					});
+				}
+
+				geometry.setAttribute(
+					'position',
+					new THREE.BufferAttribute(positions, 3)
+				);
+				geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+				const material = new THREE.PointsMaterial({
+					size: 0.15,
+					vertexColors: true,
+					transparent: true,
+					opacity: 0.9,
+					blending: THREE.AdditiveBlending,
+					map: createCircleTexture(),
+				});
+
+				// const points = new THREE.Points(geometry, material);
+				// scene.add(points);
+			}
+
+			function animateParticles() {
+				if (!animationStarted) return;
+
+				const currentTime = Date.now();
+				const points = scene.children.find((child) => child.type === 'Points');
+                if (!points) return; // Safely exit when particles are not rendered
+				const positions = points.geometry.attributes.position.array;
+				const colors = points.geometry.attributes.color.array;
+
+				// Initialize phase timer
+				if (phaseStartTime === 0) {
+					phaseStartTime = currentTime;
+				}
+
+				const timeSincePhaseStart = currentTime - phaseStartTime;
+
+				// Helper: drifting offset function
+				function getDrift(i, t) {
+					const radius = 0.2 + Math.sin(t + i * 0.1) * 0.05;
+					const angle = t + i * 0.3;
+					return {
+						x: Math.cos(angle) * radius,
+						y: Math.sin(angle * 1.2) * radius * 0.5,
+						z: Math.sin(angle) * radius * 0.3,
+					};
+				}
+
+				// Phase 1: Swirling (1.4 seconds) - particles move gently around their starting positions
+				if (animationPhase === 'swirling') {
+					if (timeSincePhaseStart < 1400) {
+						particles.forEach((particle, i) => {
+							const t = timeSincePhaseStart * 0.001;
+							const drift = getDrift(i, t);
+							positions[i * 3] = particle.originalX + drift.x;
+							positions[i * 3 + 1] = particle.originalY + drift.y;
+							positions[i * 3 + 2] = particle.originalZ + drift.z;
+						});
+					} else {
+						// Transition to consolidating to center
+						animationPhase = 'consolidatingToCenter';
+						phaseStartTime = currentTime;
+					}
+					points.geometry.attributes.position.needsUpdate = true;
+					return;
+				}
+
+				// Phase 2: Consolidating to globe center (lerp, no spring)
+				if (animationPhase === 'consolidatingToCenter') {
+					const moveDuration = 1200; // ms
+					const holdDuration = 1400; // ms
+					const colorLerpDuration = 1000; // ms
+					const centerX = globe.position.x;
+					const centerY = globe.position.y;
+					const centerZ = globe.position.z;
+
+					// Animate positions with drifting and spring
+					const tDrift = currentTime / 1000;
+					// Spring-based approach for both lerp and hold period
+					const t = Math.min(1, timeSincePhaseStart / moveDuration);
+					const arcT = Math.sin(
+						Math.PI * Math.min(1, timeSincePhaseStart / moveDuration)
+					);
+					particles.forEach((particle, i) => {
+						// On phase entry, reset spring states to current position
+						if (!particle.springInitialized) {
+							particle.springX.value = positions[i * 3];
+							particle.springY.value = positions[i * 3 + 1];
+							particle.springZ.value = positions[i * 3 + 2];
+							particle.springX.velocity = 0;
+							particle.springY.velocity = 0;
+							particle.springZ.velocity = 0;
+							particle.springInitialized = true;
+						}
+						let targetX, targetY, targetZ;
+						if (timeSincePhaseStart < moveDuration) {
+							const baseX =
+								particle.originalX + (centerX - particle.originalX) * t;
+							const baseY =
+								particle.originalY + (centerY - particle.originalY) * t;
+							const baseZ =
+								particle.originalZ + (centerZ - particle.originalZ) * t;
+							const drift = getDrift(i, tDrift);
+							// Arc offset
+							const arcX = particle.veerX * arcT;
+							const arcY = particle.veerY * arcT;
+							const arcZ = particle.veerZ * arcT;
+							targetX = baseX + drift.x + arcX;
+							targetY = baseY + drift.y + arcY;
+							targetZ = baseZ + drift.z + arcZ;
+						} else {
+							const drift = getDrift(i, tDrift);
+							targetX = centerX + drift.x;
+							targetY = centerY + drift.y;
+							targetZ = centerZ + drift.z;
+						}
+						particle.springX.value = applySpring(
+							particle.springX.value,
+							targetX,
+							particle.springX
+						);
+						particle.springY.value = applySpring(
+							particle.springY.value,
+							targetY,
+							particle.springY
+						);
+						particle.springZ.value = applySpring(
+							particle.springZ.value,
+							targetZ,
+							particle.springZ
+						);
+						positions[i * 3] = particle.springX.value;
+						positions[i * 3 + 1] = particle.springY.value;
+						positions[i * 3 + 2] = particle.springZ.value;
+					});
+					// Only reset springInitialized when phase changes
+
+					// Animate particle color lerp at the start of this phase
+					let colorT = Math.min(1, timeSincePhaseStart / colorLerpDuration);
+					particles.forEach((particle, i) => {
+						if (particle.targetR !== undefined) {
+							colors[i * 3] =
+								particle.prevR + (particle.targetR - particle.prevR) * colorT;
+							colors[i * 3 + 1] =
+								particle.prevG + (particle.targetG - particle.prevG) * colorT;
+							colors[i * 3 + 2] =
+								particle.prevB + (particle.targetB - particle.prevB) * colorT;
+						}
+					});
+					points.geometry.attributes.position.needsUpdate = true;
+					points.geometry.attributes.color.needsUpdate = true;
+
+					// After move+hold, go to consolidatingToPoints
+					if (timeSincePhaseStart > moveDuration + holdDuration) {
+						animationPhase = 'consolidatingToPoints';
+						phaseStartTime = currentTime;
+					}
+					return;
+				}
+
+				// Phase 3: Consolidating to 5 points (lerp, no spring)
+				if (animationPhase === 'consolidatingToPoints') {
+					const moveDuration = 1200; // ms
+					const holdDuration = 1400; // ms
+					const tDrift = currentTime / 1000;
+					// Spring-based approach for both lerp and hold period
+					const t = Math.min(1, timeSincePhaseStart / moveDuration);
+					const arcT = Math.sin(
+						Math.PI * Math.min(1, timeSincePhaseStart / moveDuration)
+					);
+					particles.forEach((particle, i) => {
+						// On phase entry, reset spring states to current position
+						if (!particle.springInitialized) {
+							particle.springX.value = positions[i * 3];
+							particle.springY.value = positions[i * 3 + 1];
+							particle.springZ.value = positions[i * 3 + 2];
+							particle.springX.velocity = 0;
+							particle.springY.velocity = 0;
+							particle.springZ.velocity = 0;
+							particle.springInitialized = true;
+						}
+						let targetX, targetY, targetZ;
+						if (timeSincePhaseStart < moveDuration) {
+							const targetPoint = globePoints[particle.consolidationIndex];
+							const centerX = globe.position.x;
+							const centerY = globe.position.y;
+							const centerZ = globe.position.z;
+							const baseX = centerX + (targetPoint.x - centerX) * t;
+							const baseY = centerY + (targetPoint.y - centerY) * t;
+							const baseZ = centerZ + (targetPoint.z - centerZ) * t;
+							const drift = getDrift(i, tDrift);
+							// Arc offset
+							const arcX = particle.veerX * arcT;
+							const arcY = particle.veerY * arcT;
+							const arcZ = particle.veerZ * arcT;
+							targetX = baseX + drift.x + arcX;
+							targetY = baseY + drift.y + arcY;
+							targetZ = baseZ + drift.z + arcZ;
+						} else {
+							const targetPoint = globePoints[particle.consolidationIndex];
+							const drift = getDrift(i, tDrift);
+							targetX = targetPoint.x + drift.x;
+							targetY = targetPoint.y + drift.y;
+							targetZ = targetPoint.z + drift.z;
+						}
+						particle.springX.value = applySpring(
+							particle.springX.value,
+							targetX,
+							particle.springX
+						);
+						particle.springY.value = applySpring(
+							particle.springY.value,
+							targetY,
+							particle.springY
+						);
+						particle.springZ.value = applySpring(
+							particle.springZ.value,
+							targetZ,
+							particle.springZ
+						);
+						positions[i * 3] = particle.springX.value;
+						positions[i * 3 + 1] = particle.springY.value;
+						positions[i * 3 + 2] = particle.springZ.value;
+					});
+					// Only reset springInitialized when phase changes
+
+					points.geometry.attributes.position.needsUpdate = true;
+
+					// After move+hold, go to dispersing
+					if (timeSincePhaseStart > moveDuration + holdDuration) {
+						animationPhase = 'dispersing';
+						phaseStartTime = currentTime;
+					}
+					return;
+				}
+
+				// Phase 4: Dispersing to original globe positions (lerp)
+				if (animationPhase === 'dispersing') {
+					let allParticlesDispersed = true;
+					const tDrift = currentTime / 1000;
+					particles.forEach((particle, i) => {
+						const drift = getDrift(i, tDrift);
+						const dx = particle.originalX + drift.x - positions[i * 3];
+						const dy = particle.originalY + drift.y - positions[i * 3 + 1];
+						const dz = particle.originalZ + drift.z - positions[i * 3 + 2];
+						const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+						if (distance > 0.2) {
+							allParticlesDispersed = false;
+						}
+						positions[i * 3] += dx * particle.speed;
+						positions[i * 3 + 1] += dy * particle.speed;
+						positions[i * 3 + 2] += dz * particle.speed;
+					});
+					points.geometry.attributes.position.needsUpdate = true;
+					if (allParticlesDispersed) {
+						// Advance the cycle (word, background, etc.)
+						masterCycleIndex = (masterCycleIndex + 1) % cycleWords.length;
+						updateCycleWord(masterCycleIndex);
+						// Rotate background to next quadrant (sync with cycle)
+						targetRotationRadians = -masterCycleIndex * (Math.PI / 2);
+
+						// Update all particle colors to current cycle color (with lerp in next phase)
+						const currentColor = new THREE.Color(
+							cycleWords[masterCycleIndex].color
+						);
+						particles.forEach((particle, i) => {
+							// Store previous color for lerp
+							particle.prevR = colors[i * 3];
+							particle.prevG = colors[i * 3 + 1];
+							particle.prevB = colors[i * 3 + 2];
+							particle.targetR = currentColor.r;
+							particle.targetG = currentColor.g;
+							particle.targetB = currentColor.b;
+						});
+
+						// Reset all springs for the new cycle
+						particles.forEach((p, i) => {
+							p.springInitialized = false;
+							if (p.springX) {
+								p.springX.value = positions[i * 3];
+								p.springX.velocity = 0;
+							}
+							if (p.springY) {
+								p.springY.value = positions[i * 3 + 1];
+								p.springY.velocity = 0;
+							}
+							if (p.springZ) {
+								p.springZ.value = positions[i * 3 + 2];
+								p.springZ.velocity = 0;
+							}
+						});
+
+						animationPhase = 'swirling';
+						phaseStartTime = currentTime;
+					}
+					return;
+				}
+
+				// Phase 4: Dispersing back to original positions
+				if (animationPhase === 'dispersing') {
+					const dispersionDuration = 1800; // 1.8 seconds to disperse
+					let allParticlesInPlace = true;
+
+					particles.forEach((particle, i) => {
+						// Ease out function for smooth dispersion
+						const progress = Math.min(
+							1,
+							(currentTime - phaseStartTime) / dispersionDuration
+						);
+						const easeOutProgress = 1 - Math.pow(1 - progress, 2); // Quadratic ease out
+
+						// Interpolate position
+						positions[i * 3] =
+							particle.originalX * easeOutProgress +
+							(1 - easeOutProgress) * particle.targetX;
+						positions[i * 3 + 1] =
+							particle.originalY * easeOutProgress +
+							(1 - easeOutProgress) * particle.targetY;
+						positions[i * 3 + 2] =
+							particle.originalZ * easeOutProgress +
+							(1 - easeOutProgress) * particle.targetZ;
+
+						// Check if particle is back to original position
+						const dx = particle.originalX - positions[i * 3];
+						const dy = particle.originalY - positions[i * 3 + 1];
+						const dz = particle.originalZ - positions[i * 3 + 2];
+						const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+						if (distance > 0.1) {
+							allParticlesInPlace = false;
+						}
+					});
+
+					points.geometry.attributes.position.needsUpdate = true;
+
+					// If all particles are back or max time reached, start new cycle
+					if (
+						(allParticlesInPlace && currentTime - phaseStartTime > 1000) ||
+						currentTime - phaseStartTime > 3000
+					) {
+						// Advance to next cycle
+						advanceCycle();
+
+						// Reset to swirling phase
+						animationPhase = 'swirling';
+						phaseStartTime = currentTime;
+					}
+					return;
+				} else if (animationPhase === 'formed') {
+					// Phase 3: Hold R formation with gentle movement and color pulse
+					const time = (currentTime - phaseStartTime) * 0.001;
+					const colorIntensity = 0.5 + 0.5 * Math.sin(time * 2); // Pulsing effect
+
+					// Apply gentle movement to the R shape
+					particles.forEach((particle, i) => {
+						if (particle.hasTarget) {
+							// Add subtle movement
+							const movement = 0.03; // Reduced from 0.05 for more subtle movement
+							const offsetX = Math.sin(time * 2 + i * 0.1) * movement;
+							const offsetY = Math.cos(time * 1.5 + i * 0.1) * movement * 0.7;
+
+							positions[i * 3] = particle.targetX + offsetX;
+							positions[i * 3 + 1] = particle.targetY + offsetY;
+
+							// Update colors to pulse between original and red
+							const colors = scene.children.find(
+								(child) => child.type === 'Points'
+							).geometry.attributes.color.array;
+
+							// Original colors (stored in particle object)
+							const originalR =
+								particle.originalR !== undefined
+									? particle.originalR
+									: colors[i * 3];
+							const originalG =
+								particle.originalG !== undefined
+									? particle.originalG
+									: colors[i * 3 + 1];
+							const originalB =
+								particle.originalB !== undefined
+									? particle.originalB
+									: colors[i * 3 + 2];
+
+							// Store original colors if not already stored
+							if (particle.originalR === undefined) {
+								particle.originalR = originalR;
+								particle.originalG = originalG;
+								particle.originalB = originalB;
+							}
+
+							// Target red color (using the brand's primary blue as base for red)
+							const targetR = 1.0; // Full red
+							const targetG = 0.1; // Dark red tint
+							const targetB = 0.1; // Dark red tint
+
+							// Interpolate between original and target color based on pulse
+							colors[i * 3] =
+								originalR + (targetR - originalR) * colorIntensity * 0.8; // 80% of the way to red
+							colors[i * 3 + 1] =
+								originalG + (targetG - originalG) * colorIntensity * 0.8;
+							colors[i * 3 + 2] =
+								originalB + (targetB - originalB) * colorIntensity * 0.8;
+						}
+					});
+
+					// Update color attribute
+					scene.children.find(
+						(child) => child.type === 'Points'
+					).geometry.attributes.color.needsUpdate = true;
+
+					// Move to next phase after 3 seconds
+					if (timeSincePhaseStart >= 1800) {
+						animationPhase = 'consolidating';
+						phaseStartTime = currentTime;
+						// Keep text R visible - don't hide it
+					}
+				} else if (animationPhase === 'consolidating') {
+					// Phase 4: Move to consolidation points and swirl around them
+					let allParticlesConsolidated = true;
+					const time = (currentTime - phaseStartTime) * 0.001;
+
+					particles.forEach((particle, i) => {
+						const consolidationPoint = globePoints[particle.consolidationIndex];
+
+						// Create an even tighter swirling area around each consolidation point (50% smaller total)
+						const swirlingRadius = 0.34 + Math.sin(time + i * 0.05) * 0.056;
+						const swirlingSpeed = time * 2 + i * 0.2;
+
+						// Calculate swirling position around consolidation point
+						const swirlingOffset = new THREE.Vector3(
+							Math.cos(swirlingSpeed) * swirlingRadius,
+							Math.sin(swirlingSpeed * 0.7) * swirlingRadius * 0.6,
+							Math.sin(swirlingSpeed) * swirlingRadius * 0.4
+						);
+
+						const targetX = consolidationPoint.x + swirlingOffset.x;
+						const targetY = consolidationPoint.y + swirlingOffset.y;
+						const targetZ = consolidationPoint.z + swirlingOffset.z;
+
+						const dx = targetX - positions[i * 3];
+						const dy = targetY - positions[i * 3 + 1];
+						const dz = targetZ - positions[i * 3 + 2];
+
+						const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+						if (distance > 0.45) {
+							allParticlesConsolidated = false;
+						}
+
+						// Smoothly move towards the swirling target
+						positions[i * 3] += dx * particle.speed * 0.8;
+						positions[i * 3 + 1] += dy * particle.speed * 0.8;
+						positions[i * 3 + 2] += dz * particle.speed * 0.8;
+					});
+
+					// Stay in consolidation phase 2 seconds longer (6 seconds total)
+					if (timeSincePhaseStart > 6000 && allParticlesConsolidated) {
+						animationPhase = 'dispersing';
+						phaseStartTime = currentTime;
+					}
+				} else if (animationPhase === 'dispersing') {
+					// Phase 5: Disperse particles back across the globe
+					let allParticlesDispersed = true;
+
+					particles.forEach((particle, i) => {
+						const dx = particle.originalX - positions[i * 3];
+						const dy = particle.originalY - positions[i * 3 + 1];
+						const dz = particle.originalZ - positions[i * 3 + 2];
+
+						const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+						if (distance > 0.2) {
+							allParticlesDispersed = false;
+						}
+
+						positions[i * 3] += dx * particle.speed;
+						positions[i * 3 + 1] += dy * particle.speed;
+						positions[i * 3 + 2] += dz * particle.speed;
+					});
+
+					// Reset for next cycle
+					if (allParticlesDispersed) {
+						animationPhase = 'swirling';
+						phaseStartTime = currentTime;
+
+						// Reset particle colors to original
+						const colors = scene.children.find(
+							(child) => child.type === 'Points'
+						).geometry.attributes.color.array;
+
+						particles.forEach((particle) => {
+							particle.hasTarget = false;
+
+							// Reset to original colors if they were stored
+							if (particle.originalR !== undefined) {
+								colors[particle.index * 3] = particle.originalR;
+								colors[particle.index * 3 + 1] = particle.originalG;
+								colors[particle.index * 3 + 2] = particle.originalB;
+							}
+						});
+
+						// Update color attribute after resetting
+						scene.children.find(
+							(child) => child.type === 'Points'
+						).geometry.attributes.color.needsUpdate = true;
+					}
+				}
+
+				// Update positions for the current frame
+				scene.children.find(
+					(child) => child.type === 'Points'
+				).geometry.attributes.position.needsUpdate = true;
+			}
+
+			function animate() {
+				requestAnimationFrame(animate);
+				const currentTime = Date.now();
+
+				// Rotate globe
+				if (globe) {
+					// Use a slower, more subtle rotation for the globe
+					globe.rotation.y += 0.001;
+
+					// Store current rotation for background sync
+					globeRotation = globe.rotation.y;
+				}
+
+				// Update dynamic background (handles its own spring-based rotation)
+				renderDynamicBackground();
+
+				// Update particle animation if active
+				if (animationStarted) {
+					animateParticles();
+				}
+
+				// Render scene
+				renderer.render(scene, camera);
+			}
+
+			// Handle window resize
+			window.addEventListener('resize', () => {
+				// Update camera
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				// Update renderer size
+				renderer.setSize(window.innerWidth, window.innerHeight);
+
+				// Resize and redraw background canvas
+				if (backgroundCanvas) {
+					backgroundCanvas.width = window.innerWidth;
+					backgroundCanvas.height = window.innerHeight;
+					renderDynamicBackground();
+				}
+
+				// Force a re-render
+				renderer.render(scene, camera);
+			});
+
+			// Initialize when page loads
+			window.addEventListener('load', init);
+
+			// Add hover effect to CTA button
+			document.querySelector('.cta-button').addEventListener('click', () => {
+				alert('Welcome to Routly! 🚀');
+			});
+
+			class ElectricalFlowDiagram {
+				constructor() {
+					this.animationSpeed = 1;
+					this.isPlaying = true;
+					this.currentContainer = 0;
+					this.intervalId = null;
+					this.totalContainers = 5;
+
+					this.init();
+				}
+
+				init() {
+					this.bindEvents();
+					this.startCycle();
+					this.updateActiveContainer();
+				}
+
+				bindEvents() {
+					// Play/Pause buttons
+					document
+						.getElementById('playBtn')
+						.addEventListener('click', () => this.handlePlay());
+					document
+						.getElementById('pauseBtn')
+						.addEventListener('click', () => this.handlePause());
+
+					// Speed slider
+					const speedSlider = document.getElementById('speedSlider');
+					speedSlider.addEventListener('input', (e) =>
+						this.handleSpeedChange(parseFloat(e.target.value))
+					);
+
+					// Tech container clicks
+					document.querySelectorAll('.tech-container').forEach((container) => {
+						container.addEventListener('click', (e) => {
+							const index = parseInt(
+								e.currentTarget.getAttribute('data-index')
+							);
+							this.handleContainerClick(index);
+						});
+					});
+				}
+
+				cycleContainers() {
+					this.currentContainer =
+						(this.currentContainer + 1) % this.totalContainers;
+					this.updateActiveContainer();
+				}
+
+				startCycle() {
+					if (this.intervalId) clearInterval(this.intervalId);
+					const interval = 3000 / this.animationSpeed;
+					this.intervalId = setInterval(() => this.cycleContainers(), interval);
+				}
+
+				handlePlay() {
+					this.isPlaying = true;
+					this.updateButtonStates();
+					this.startCycle();
+				}
+
+				handlePause() {
+					this.isPlaying = false;
+					this.updateButtonStates();
+					if (this.intervalId) {
+						clearInterval(this.intervalId);
+						this.intervalId = null;
+					}
+				}
+
+				handleSpeedChange(speed) {
+					this.animationSpeed = speed;
+
+					// Update CSS custom property
+					document.documentElement.style.setProperty(
+						'--animation-speed',
+						speed.toString()
+					);
+
+					// Update speed value display
+					document.getElementById('speedValue').textContent =
+						speed.toFixed(1) + 'x';
+
+					// Update particle animation durations
+					this.updateParticleAnimations();
+
+					if (this.isPlaying) {
+						this.startCycle();
+					}
+				}
+
+				handleContainerClick(index) {
+					this.currentContainer = index;
+					this.updateActiveContainer();
+				}
+
+				updateButtonStates() {
+					const playBtn = document.getElementById('playBtn');
+					const pauseBtn = document.getElementById('pauseBtn');
+
+					if (this.isPlaying) {
+						playBtn.classList.add('active');
+						playBtn.classList.remove('inactive');
+						pauseBtn.classList.add('inactive');
+						pauseBtn.classList.remove('active');
+					} else {
+						playBtn.classList.add('inactive');
+						playBtn.classList.remove('active');
+						pauseBtn.classList.add('active');
+						pauseBtn.classList.remove('inactive');
+					}
+				}
+
+				updateActiveContainer() {
+					document
+						.querySelectorAll('.tech-container')
+						.forEach((container, index) => {
+							if (index === this.currentContainer) {
+								container.classList.add('container-active', 'container-glow');
+							} else {
+								container.classList.remove(
+									'container-active',
+									'container-glow'
+								);
+							}
+						});
+				}
+
+				updateParticleAnimations() {
+					const particles = document.querySelectorAll('.current-particle');
+					particles.forEach((particle, index) => {
+						const animateMotion = particle.querySelector('animateMotion');
+						if (animateMotion) {
+							const duration = (3 / this.animationSpeed).toFixed(1) + 's';
+							animateMotion.setAttribute('dur', duration);
+						}
+					});
+				}
+			}
+
+			// Initialize the diagram when the page loads
+			document.addEventListener('DOMContentLoaded', () => {
+				new ElectricalFlowDiagram();
+			});
+		</script>
+	</body>
+</html>
